@@ -185,10 +185,8 @@ class Sudoku:
 
 if __name__ == '__main__':
     # TODO
-    # "./sudoku.py solve filename" solve sudoku in filename
-    # "./sudoku.py check filename" check sudoku in filename
-    # "./sudoku.py gen number" generate sudoku with number of cells filled
     # auto detect raw/pretty formats
+    # open text editor (vi/nano) to input sudoku instead of reading file
     # use C to imporve solving algorithm
     # create graphs (time/complexity) on 2 impementations
     # improve solving algorithm, mesure time again
@@ -198,43 +196,38 @@ if __name__ == '__main__':
     # "./sudoku.py solve filenames" solve sudoku in all files,
     # ^ optionally & default including filename, optionally & non-default the puzzle itself
 
-    def from_file(fname):
-        with open(fname) as file:
-            s = Sudoku.from_file(file, fmt='pretty')
-        return s
-
-    def solve(fname):
-        s = from_file(fname)
+    def solve(args):
+        s = Sudoku.from_file(args.file, fmt='pretty')
+        args.file.close()
         s.solve()
         print(s)
 
-    def check(fname):
-        s = from_file(fname)
+    def check(args):
+        s = Sudoku.from_file(args.file, fmt='pretty')
+        args.file.close()
         print(s.check())
 
-    def gen(number):
-        print(Sudoku.random(number))
+    import argparse
+    parser = argparse.ArgumentParser(description="solve or generate sudoku")
+    subparsers = parser.add_subparsers()
 
-    import sys
-    if sys.argv[1] == 'solve':
-        solve(sys.argv[2])
-    elif sys.argv[1] == 'check':
-        check(sys.argv[2])
-    elif sys.argv[1] == 'gen':
-        gen(int(sys.argv[2]))
 
-    # import argparse
-    # parser = argparse.ArgumentParser(description="solve or generate sudoku")
-    # subparsers = parser.add_subparsers()
+    # for pname, hlp, agrname, argtype, func in ((), (), ()):
+        # p = subparsers.add_parser(pname, help=hlp)
+        # p.add_argument(agrname, type=argtype)
+        # p.set_defaults(func=func)
 
-    # parser_solve = subparsers.add_parser('solve', help='solve sudoku')
-    # parser_solve.add_argument('filenames', help='put names of files that contains sudoku',
-    #     type=argparse.FileType('rt'), nargs='+')
-    # parser_solve.set_defaults(func=solve)
+    parser_solve = subparsers.add_parser('solve', help='solve sudoku')
+    parser_solve.add_argument('file', type=argparse.FileType('rt'))
+    parser_solve.set_defaults(func=solve)
 
-    # parser_generate = subparsers.add_parser('generate sudoku')
-    # parser_solve.add_argument('number', help='number of cells to be filled')
-    # parser.
-    # args = parser.parse_args()
+    parser_check = subparsers.add_parser('check', help='check if sudoku solved correctly')
+    parser_check.add_argument('file', type=argparse.FileType('rt'))
+    parser_check.set_defaults(func=check)
 
-    # print(Sudoku.random(int(input('Number of filled cells: '))))
+    parser_gen = subparsers.add_parser('gen', help='generate sudoku with N inserted cells')
+    parser_gen.add_argument('number', type=int)
+    parser_gen.set_defaults(func=lambda argrs : print(Sudoku.random(args.number)))
+
+    args = parser.parse_args()
+    args.func(args)
